@@ -5,19 +5,14 @@
 //
 
 import Foundation
+import KeychainSwift
 
 extension AccessToken {
     
     @discardableResult
     internal static func storeInKeychainn(token: AccessToken) -> Bool {
-        let encoder = JSONEncoder()
-        if let encoded = try? encoder.encode(token) {
-            let attributes = [
-                kSecValueData: encoded,
-                kSecClass: kSecClassKey,
-                kSecAttrLabel: "InstagramAccessToken"
-            ] as CFDictionary
-            return SecItemAdd(attributes, nil) == 0
+        if let data = try? JSONEncoder().encode(token) {
+            return KeychainSwift().set(data, forKey: "InstagramAccessToken")
         } else {
             return false
         }
@@ -25,29 +20,15 @@ extension AccessToken {
 
     @discardableResult
     internal static func loadFromKeychain() -> AccessToken? {
-        let query = [
-            kSecClass: kSecClassKey,
-            kSecAttrLabel: "InstagramAccessToken",
-            kSecReturnData: true
-        ] as CFDictionary
-        var result: AnyObject?
-        if SecItemCopyMatching(query, &result) == 0 {
-            if let result = result as? Data {
-                let decoder = JSONDecoder()
-                if let token = try? decoder.decode(AccessToken.self, from: result) {
-                    return token
-                }
-            }
+        if let data = KeychainSwift().getData("InstagramAccessToken") {
+            return try? JSONDecoder().decode(AccessToken.self, from: data)
+        } else {
+            return nil
         }
-        return nil
     }
 
     @discardableResult
     internal static func removeFromKeychain() -> Bool {
-        let query = [
-            kSecClass: kSecClassKey,
-            kSecAttrLabel: "InstagramAccessToken"
-        ] as CFDictionary
-        return SecItemDelete(query) == 0
+        return KeychainSwift().delete("InstagramAccessToken")
     }
 }

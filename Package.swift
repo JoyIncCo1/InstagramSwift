@@ -16,10 +16,17 @@ let package = Package(
             name: "InstagramLogin",
             targets: ["InstagramLogin"]),
     ],
+    dependencies: [
+        .package(
+            name: "KeychainSwift",
+            url: "https://github.com/evgenyneu/keychain-swift.git",
+            from: "19.0.0"
+        )
+    ],
     targets: [
         .target(
             name: "InstagramCore",
-            dependencies: [],
+            dependencies: ["KeychainSwift"],
             path: "InstagramCore"),
         .target(
             name: "InstagramLogin",
